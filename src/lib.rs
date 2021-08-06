@@ -99,7 +99,8 @@ impl GolBoard {
     }
 
     fn neighbor_indices(&self, i: usize) -> impl Iterator<Item = usize> {
-        let mut result = Vec::new();
+        const MAX_NEIGHBORS: usize = 8;
+        let mut result = Vec::with_capacity(MAX_NEIGHBORS);
         let (row, col) = (i / self.width, i % self.width);
         let row: isize = row.try_into().unwrap();
         let col: isize = col.try_into().unwrap();

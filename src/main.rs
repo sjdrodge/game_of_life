@@ -1,3 +1,5 @@
+use rand::prelude::*;
+
 use game_of_life::GolBoard;
 
 fn main() {
@@ -17,5 +19,20 @@ fn main() {
     for _ in 0..2 {
         board.process_step();
         println!("{:?}", board);
+    }
+
+    let mut rng = StdRng::seed_from_u64(0x04e043f39bb45bd8);
+    let mut board = [[0; 1000]; 1000];
+    for _ in 0..1000 {
+        *board
+            .choose_mut(&mut rng)
+            .unwrap()
+            .choose_mut(&mut rng)
+            .unwrap() = 1;
+    }
+    let mut board = GolBoard::from_slice(&board);
+    println!("Starting long process...");
+    for _ in 0..200 {
+        board.process_step();
     }
 }
