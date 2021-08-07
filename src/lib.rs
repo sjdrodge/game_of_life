@@ -1,5 +1,7 @@
 use std::convert::TryInto;
 
+use arrayvec::ArrayVec;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GolCell {
     Dead,
@@ -37,17 +39,24 @@ macro_rules! impl_integer_to_golcell {
 impl_integer_to_golcell! {i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize}
 
 impl GolCell {
-    pub fn is_dead(self) -> bool {
-        match self {
+    pub fn is_dead(&self) -> bool {
+        match *self {
             GolCell::Dead => true,
             GolCell::Alive => false,
         }
     }
 
-    pub fn is_alive(self) -> bool {
-        match self {
+    pub fn is_alive(&self) -> bool {
+        match *self {
             GolCell::Dead => false,
             GolCell::Alive => true,
+        }
+    }
+
+    pub fn flip(&mut self) {
+        *self = match *self {
+            GolCell::Dead => GolCell::Alive,
+            GolCell::Alive => GolCell::Dead,
         }
     }
 }
@@ -98,22 +107,33 @@ impl GolBoard {
         result
     }
 
+    pub fn dims(&self) -> (usize, usize) {
+        (self.height, self.width)
+    }
+
     fn neighbor_indices(&self, i: usize) -> impl Iterator<Item = usize> {
-        const MAX_NEIGHBORS: usize = 8;
-        let mut result = Vec::with_capacity(MAX_NEIGHBORS);
+        const NEIGHBORS: &[(isize, isize)] = &[
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            //(0, 0),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ];
+        const MAX_NEIGHBORS: usize = NEIGHBORS.len();
+        // let mut result = Vec::with_capacity(MAX_NEIGHBORS);
+        let mut result = ArrayVec::<usize, MAX_NEIGHBORS>::new();
         let height: isize = self.height.try_into().unwrap();
         let width: isize = self.width.try_into().unwrap();
         let i: isize = i.try_into().unwrap();
         let (row, col) = (i / width, i % width);
-        for r in -1..=1 {
-            for c in -1..=1 {
-                if r == 0 && c == 0 {
-                    continue;
-                }
-                let (r, c) = (row + r, col + c);
-                if r >= 0 && r < height && c >= 0 && c < width {
-                    result.push((r * width + c).try_into().unwrap());
-                }
+        for (r, c) in NEIGHBORS {
+            let (r, c) = (row + r, col + c);
+            if r >= 0 && r < height && c >= 0 && c < width {
+                result.push((r * width + c).try_into().unwrap());
             }
         }
         result.into_iter()
@@ -142,10 +162,7 @@ impl GolBoard {
         }
 
         for i in fliplist {
-            self.cells[i] = match self.cells[i] {
-                GolCell::Dead => GolCell::Alive,
-                GolCell::Alive => GolCell::Dead,
-            }
+            self.cells[i].flip();
         }
     }
 }

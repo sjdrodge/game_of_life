@@ -31,8 +31,13 @@ fn main() {
             .unwrap() = 1;
     }
     let mut board = GolBoard::from_slice(&board);
-    println!("Starting long process...");
-    for _ in 0..200 {
+    const ITERATIONS: usize = 1000;
+    let (height, width) = board.dims();
+    println!(
+        "Iterating {} times on a {}x{} game...",
+        ITERATIONS, height, width
+    );
+    for _ in 0..ITERATIONS {
         board.process_step();
     }
 }
