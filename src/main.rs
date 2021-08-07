@@ -26,7 +26,7 @@ fn main() {
 
     let mut rng = thread_rng();
     let mut board = [[0; 200]; 200];
-    for _ in 0..2000 {
+    for _ in 0..5000 {
         *board
             .choose_mut(&mut rng)
             .unwrap()
@@ -40,7 +40,7 @@ fn main() {
     const CELL_SIZE: f64 = 5.0;
     let mut window: PistonWindow = WindowSettings::new(
         "Conway's Game of Life",
-        [height as f64 * CELL_SIZE, width as f64 * CELL_SIZE],
+        [width as f64 * CELL_SIZE, height as f64 * CELL_SIZE],
     )
     .exit_on_esc(true)
     .build()
@@ -59,8 +59,8 @@ fn main() {
                 piston_window::rectangle(
                     foreground_color,
                     [
-                        r as f64 * CELL_SIZE,
                         c as f64 * CELL_SIZE,
+                        r as f64 * CELL_SIZE,
                         CELL_SIZE,
                         CELL_SIZE,
                     ],

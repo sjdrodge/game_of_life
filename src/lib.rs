@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 
+// TODO: abstract the indexing
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GolCell {
     Dead,
@@ -108,6 +110,17 @@ impl GolBoard {
         result
     }
 
+    pub fn from_alive_list<T>(height: usize, width: usize, alive_locs: T) -> Self
+    where
+        T: IntoIterator<Item = (usize, usize)>,
+    {
+        Self {
+            height,
+            width,
+            cells: alive_locs.into_iter().collect(),
+        }
+    }
+
     pub fn dims(&self) -> (usize, usize) {
         (self.height, self.width)
     }
@@ -147,6 +160,7 @@ impl GolBoard {
     pub fn process_step(&mut self) {
         let mut live_neighbor_counts = HashMap::new();
         for (r, c) in self.cells.iter() {
+            live_neighbor_counts.entry((*r, *c)).or_insert(0);
             for (r, c) in self.neighbor_indices(*r, *c) {
                 let count = live_neighbor_counts.entry((r, c)).or_insert(0);
                 *count += 1;
