@@ -1,7 +1,5 @@
 use std::convert::TryInto;
 
-use arrayvec::ArrayVec;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GolCell {
     Dead,
@@ -124,8 +122,7 @@ impl GolBoard {
             (1, 1),
         ];
         const MAX_NEIGHBORS: usize = NEIGHBORS.len();
-        // let mut result = Vec::with_capacity(MAX_NEIGHBORS);
-        let mut result = ArrayVec::<usize, MAX_NEIGHBORS>::new();
+        let mut result = Vec::with_capacity(MAX_NEIGHBORS);
         let height: isize = self.height.try_into().unwrap();
         let width: isize = self.width.try_into().unwrap();
         let i: isize = i.try_into().unwrap();
