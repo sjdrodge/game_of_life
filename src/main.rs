@@ -31,7 +31,7 @@ fn main() {
             .unwrap() = 1;
     }
     let mut board = GolBoard::from_slice(&board);
-    const ITERATIONS: usize = 1000;
+    const ITERATIONS: usize = 100000;
     let (height, width) = board.dims();
     println!(
         "Iterating {} times on a {}x{} game...",

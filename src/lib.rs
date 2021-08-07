@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,7 +64,7 @@ impl GolCell {
 pub struct GolBoard {
     height: usize,
     width: usize,
-    cells: Vec<GolCell>,
+    cells: HashSet<(usize, usize)>,
 }
 
 impl GolBoard {
@@ -71,7 +72,7 @@ impl GolBoard {
         Self {
             height,
             width,
-            cells: vec![GolCell::Dead; height * width],
+            cells: HashSet::new(),
         }
     }
 
@@ -87,7 +88,7 @@ impl GolBoard {
         let mut result = Self {
             height: 0,
             width: 0,
-            cells: Vec::new(),
+            cells: HashSet::new(),
         };
 
         let height = matrix.len();
@@ -95,11 +96,13 @@ impl GolBoard {
         if height > 0 {
             result.height = height;
             result.width = matrix[0].as_ref().len();
-            result.cells.reserve_exact(result.height * result.width);
-            for row in matrix.iter() {
-                result
-                    .cells
-                    .extend(row.as_ref().iter().map(|x| x.clone().into()));
+            for r in 0..matrix.len() {
+                let row = matrix[r].as_ref();
+                for c in 0..row.len() {
+                    if row[c].clone().into().is_alive() {
+                        result.cells.insert((r, c));
+                    }
+                }
             }
         }
         result
@@ -109,7 +112,7 @@ impl GolBoard {
         (self.height, self.width)
     }
 
-    fn neighbor_indices(&self, i: usize) -> impl Iterator<Item = usize> {
+    fn neighbor_indices(&self, row: usize, col: usize) -> impl Iterator<Item = (usize, usize)> {
         const NEIGHBORS: &[(isize, isize)] = &[
             (-1, -1),
             (-1, 0),
@@ -125,41 +128,33 @@ impl GolBoard {
         let mut result = Vec::with_capacity(MAX_NEIGHBORS);
         let height: isize = self.height.try_into().unwrap();
         let width: isize = self.width.try_into().unwrap();
-        let i: isize = i.try_into().unwrap();
-        let (row, col) = (i / width, i % width);
+        let row: isize = row.try_into().unwrap();
+        let col: isize = col.try_into().unwrap();
         for (r, c) in NEIGHBORS {
             let (r, c) = (row + r, col + c);
             if r >= 0 && r < height && c >= 0 && c < width {
-                result.push((r * width + c).try_into().unwrap());
+                let (r, c) = (r.try_into().unwrap(), c.try_into().unwrap());
+                result.push((r, c));
             }
         }
         result.into_iter()
     }
 
     pub fn process_step(&mut self) {
-        let mut fliplist = Vec::new();
-        for i in 0..self.cells.len() {
-            let living_neighbor_count = self
-                .neighbor_indices(i)
-                .filter(|&i| self.cells[i].is_alive())
-                .count();
-
-            match self.cells[i] {
-                GolCell::Dead => {
-                    if living_neighbor_count == 3 {
-                        fliplist.push(i);
-                    }
-                }
-                GolCell::Alive => {
-                    if living_neighbor_count != 2 && living_neighbor_count != 3 {
-                        fliplist.push(i);
-                    }
-                }
+        let mut live_neighbor_counts = HashMap::new();
+        for (r, c) in self.cells.iter() {
+            for (r, c) in self.neighbor_indices(*r, *c) {
+                let count = live_neighbor_counts.entry((r, c)).or_insert(0);
+                *count += 1;
             }
         }
 
-        for i in fliplist {
-            self.cells[i].flip();
+        for ((r, c), count) in live_neighbor_counts {
+            if count < 2 || count > 3 {
+                self.cells.remove(&(r, c));
+            } else if count == 3 {
+                self.cells.insert((r, c));
+            }
         }
     }
 }
