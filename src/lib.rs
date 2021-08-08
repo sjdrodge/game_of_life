@@ -98,10 +98,9 @@ impl GolBoard {
         if height > 0 {
             result.height = height;
             result.width = matrix[0].as_ref().len();
-            for r in 0..matrix.len() {
-                let row = matrix[r].as_ref();
-                for c in 0..row.len() {
-                    if row[c].clone().into().is_alive() {
+            for (r, row) in matrix.iter().enumerate() {
+                for (c, cell) in row.as_ref().iter().enumerate() {
+                    if cell.clone().into().is_alive() {
                         result.cells.insert((r, c));
                     }
                 }
@@ -159,7 +158,7 @@ impl GolBoard {
 
     pub fn process_step(&mut self) {
         let mut live_neighbor_counts = HashMap::new();
-        for (r, c) in self.cells.iter() {
+        for (r, c) in &self.cells {
             live_neighbor_counts.entry((*r, *c)).or_insert(0);
             for (r, c) in self.neighbor_indices(*r, *c) {
                 let count = live_neighbor_counts.entry((r, c)).or_insert(0);
@@ -168,7 +167,7 @@ impl GolBoard {
         }
 
         for ((r, c), count) in live_neighbor_counts {
-            if count < 2 || count > 3 {
+            if !(2..=3).contains(&count) {
                 self.cells.remove(&(r, c));
             } else if count == 3 {
                 self.cells.insert((r, c));
