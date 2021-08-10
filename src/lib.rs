@@ -124,8 +124,8 @@ impl GolBoard {
         (self.height, self.width)
     }
 
-    pub fn alive_cells(&self) -> impl Iterator<Item = (usize, usize)> {
-        self.cells.iter().copied().collect::<Vec<_>>().into_iter()
+    pub fn alive_cells(&self) -> impl Iterator<Item = (usize, usize)> + '_ {
+        self.cells.iter().copied()
     }
 
     fn neighbor_indices(&self, row: usize, col: usize) -> impl Iterator<Item = (usize, usize)> {
