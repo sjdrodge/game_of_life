@@ -9,9 +9,6 @@ fn main() {
     // let board = GolBoard::new(2, 5);
     // println!("{:?}", board);
     //
-    // let board = GolBoard::new_square(2);
-    // println!("{:?}", board);
-    //
     // let board = [[true, false], [false, true]];
     // let board = GolBoard::from_slice(&board);
     // println!("{:?}", board);

@@ -40,6 +40,7 @@ macro_rules! impl_integer_to_golcell {
 impl_integer_to_golcell! {i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize}
 
 impl GolCell {
+    #[inline]
     pub fn is_dead(&self) -> bool {
         match *self {
             GolCell::Dead => true,
@@ -47,6 +48,7 @@ impl GolCell {
         }
     }
 
+    #[inline]
     pub fn is_alive(&self) -> bool {
         match *self {
             GolCell::Dead => false,
@@ -54,6 +56,7 @@ impl GolCell {
         }
     }
 
+    #[inline]
     pub fn flip(&mut self) {
         *self = match *self {
             GolCell::Dead => GolCell::Alive,
@@ -70,16 +73,13 @@ pub struct GolBoard {
 }
 
 impl GolBoard {
+    #[inline]
     pub fn new(height: usize, width: usize) -> Self {
         Self {
             height,
             width,
             cells: HashSet::new(),
         }
-    }
-
-    pub fn new_square(size: usize) -> Self {
-        Self::new(size, size)
     }
 
     pub fn from_slice<T, U>(matrix: &[U]) -> Self
@@ -109,6 +109,7 @@ impl GolBoard {
         result
     }
 
+    #[inline]
     pub fn from_alive_list<T>(height: usize, width: usize, alive_locs: T) -> Self
     where
         T: IntoIterator<Item = (usize, usize)>,
@@ -120,10 +121,12 @@ impl GolBoard {
         }
     }
 
+    #[inline]
     pub fn dims(&self) -> (usize, usize) {
         (self.height, self.width)
     }
 
+    #[inline]
     pub fn alive_cells(&self) -> impl Iterator<Item = (usize, usize)> + '_ {
         self.cells.iter().copied()
     }
